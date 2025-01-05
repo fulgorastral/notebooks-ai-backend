@@ -32,6 +32,6 @@ app.use("/api/images", imagesRouter)
 app.use("/api/ai", aiRouter)
 
 // Start server
-app.listen(8000, () => {
-    console.log("Server running on https://localhost:8000")
+app.listen(3000, () => {
+    console.log("Server running on https://localhost:3000")
 })
