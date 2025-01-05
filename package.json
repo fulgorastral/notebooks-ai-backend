@@ -6,6 +6,12 @@
 		"openai": "^4.77.0",
 		"unsplash-js": "^7.0.19"
 	},
+	"scripts": {
+		"build": "echo 'No build step'",
+		"dev": "nodemon index.mjs",
+		"start": "node index.mjs",
+		"vercel-build": "echo 'No build step'"
+	},
 	"devDependencies": {
 		"nodemon": "^3.1.9"
 	}
