@@ -26,6 +26,8 @@ app.use((req, res, next) => {
     next()
 })
 
+app.use(express.json());
+
 // Images router
 app.use("/api/images", imagesRouter)
 // AI router

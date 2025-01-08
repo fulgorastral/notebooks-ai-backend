@@ -1,41 +1,61 @@
 import OpenAI from "openai"
 
-
 const openai = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY,
 })
 
 // Ask the AI for an exercise
-export async function askAI(prompt) {
+export async function askAI(prompt, history, textHistory, currentSection) {
     try {
-        const response = await openai.chat.completions.create({
+        console.log(`[STEP 0]: Asking AI for exercise based on prompt: ${prompt}`);
+
+        // First call to generate the exercise in plain text
+        const textResponse = await openai.chat.completions.create({
             model: "gpt-4o-mini",
             messages: [
-                { "role": "system", "content": 'Eres una IA que se dedica a crear ejercicios para niños de primaria. El usuario the va a pedir que generes un ejercicio con unas características concretas y tendrás que generar un un ejercicio el cual estará representado por un JSON el cual se rederizará más adelante.'},
-                { "role": "system", "content": 'El JSON que tienes que generar debe tener las siguientes propiedades propiedades: `height` lo cual será la altura de la sección, `title` título del ejercicio, `elements` objeto que contendrá los elementos que podrás usar para construir ele ejercicio '},
-                { "role": "system", "content": 'Los elementos que podrás usar son: `text`, `image`, `calligraphy`, `basic_operation_v`, `free_form_svg`'},
-                { "role": "system", "content": 'Todos los elementos tendrán las siguientes propiedades: `id`, `type`, `x`, `y`, `width`, `height`'},
-                { "role": "system", "content": 'El espacio disponible para el ejercicio es de 640px de ancho y de alto lo tu especificarás con la propiedad `height`'},
-                { "role": "system", "content": 'Puedes utilizar el `height` del ejercicio como referencia para acomodar los elementos. Utiliza las propiedades `x` y `y` para posicionar los elementos y `width` y `height` para darles tamaño'},
-                { "role": "system", "content": 'No coloques elementos fuera de la sección, si lo haces, el ejercicio no se verá correctamente, también coloca los elementos de forma ordenada y que se vean bien. Coloca los elementos a partir de y=50 ya que la parte superior de la sección se usará para el título del ejercicio'},
-                { "role": "system", "content": 'Evita colocar elementos que se solapen, si lo haces, el ejercicio no se verá correctamente'},
-                { "role": "system", "content": 'Hay elementos con propiedades adicionales: '},
-                { "role": "system", "content": '`text` tiene la propiedad `text` que es el texto que se mostrará'},
-                { "role": "system", "content": '`image` tiene la propiedad `src` que es la URL de la imagen'},
-                { "role": "system", "content": '`calligraphy` tiene la propiedad `text` que es el texto que se mostrará'},
-                { "role": "system", "content": '`basic_operation_v` tiene las propiedades `operator="+" (opciones: "+", "-", "*", "/")`, `operands=[]`, `result` que son el operador, los operandos y el resultado de la operación. Puedes dejar un hueco en blanco así `""` para que el alumno lo rellene (valido tanto para operador como para operandos). Como referencia, cada fila ocupa 30px, osea 2 operandos mas el resultado, necesitaremos que la sección mida 90px'},
-                { "role": "system", "content": '`free_form_svg` tiene la propiedad `content` que es el contenido SVG que se mostrará, (importante: este elemento es muy util ya que te permite tener una mayor flexibilidad para crear elementos complejos, tienes libertad para usarlo como quieras y dar rienda suelta a tu creatividad)'},
-                { "role": "system", "content": 'Ejemplo 1, Ejercicio de mates: `{"_id": "template-1","_type": "blank","_height": 200,"_title": "Rodea las restas resueltas de forma <b>incorrecta</b>","_elements": {"basic_operation_v-1": {"_id": "basic_operation_v-1","_x": 50,"_y": 60,"_width": 70,"_height": 115,"_type": "basic_operation_v","_operator": "-","_operands": ["538","416"],"_result": "122"},"basic_operation_v-2": {"_id": "basic_operation_v-2","_x": 160,"_y": 60,"_width": 70,"_height": 115,"_type": "basic_operation_v","_operator": "-","_operands": ["684","360"],"_result": "324"},"basic_operation_v-3": {"_id": "basic_operation_v-3","_x": 270,"_y": 60,"_width": 70,"_height": 115,"_type": "basic_operation_v","_operator": "-","_operands": ["967","436"],"_result": "430"},"basic_operation_v-4": {"_id": "basic_operation_v-4","_x": 480,"_y": 60,"_width": 70,"_height": 115,"_type": "basic_operation_v","_operator": "-","_operands": ["827","412"],"_result": "315"},"01e61671-8f7c-4ea8-bfd6-535a9d22cc82": {"_id": "01e61671-8f7c-4ea8-bfd6-535a9d22cc82","_x": 380,"_y": 60,"_width": 70,"_height": 115,"_type": "basic_operation_v","_operator": "-","_operands": ["805","503"],"_result": "208"}}}`'},
-                { "role": "system", "content": 'Ejemplo 2, Ejercicio de matemáticas aplicadas: `{"_id": "template-2", "_type": "blank", "_height": 244.421875, "_title": "<span>R</span><span>o</span><span>d</span><span>e</span><span>a</span><span> </span><span>l</span><span>o</span><span>s</span><span> </span><span>o</span><span>b</span><span>j</span><span>e</span><span>t</span><span>o</span><span>s</span><span> </span><span>q</span><span>u</span><span>e</span><span> </span><span>p</span><span>o</span><span>d</span><span>r</span><span>í</span><span>a</span><span>s</span><span> </span><span>c</span><span>o</span><span>m</span><span>p</span><span>r</span><span>a</span><span>r</span><span> </span><span>c</span><span>o</span><span>n</span><span> </span><span style=\"font-weight: bold;\">2</span><span style=\"font-weight: bold;\">3</span><span style=\"font-weight: bold;\">€</span>", "_elements": { "2078a78f-0602-4fd0-90c6-014584672f26": { "_id": "2078a78f-0602-4fd0-90c6-014584672f26", "_x": 153, "_y": 38, "_width": 140, "_height": 120, "_type": "image", "_src": "https://img.b2bpic.net/premium-vector/hand-drawn-eyeglasses-icon-sticker-style-vector-illustration_755164-11547.jpg" }, "7c55e4c0-83e7-4e16-abcf-9fe2d49ff44b": { "_id": "7c55e4c0-83e7-4e16-abcf-9fe2d49ff44b", "_x": 487, "_y": 106, "_width": 140, "_height": 120, "_type": "image", "_src": "https://img.b2bpic.net/premium-vector/blue-umbrella-falling-autumn-maple-leaves_255569-600.jpg" }, "05630181-d37a-499d-bf3d-39988c7ffd21": { "_id": "05630181-d37a-499d-bf3d-39988c7ffd21", "_x": 404, "_y": 46, "_width": 90, "_height": 100, "_type": "image", "_src": "https://img.b2bpic.net/premium-vector/racing-helmet-icon-cartoon-style-isolated-white-background-equipment-symbol_96318-58734.jpg" }, "9fb2cf9c-833c-42f7-902a-23ac63bfdcb0": { "_id": "9fb2cf9c-833c-42f7-902a-23ac63bfdcb0", "_x": 285, "_y": 124, "_width": 90, "_height": 100, "_type": "image", "_src": "https://img.b2bpic.net/premium-vector/cute-mineral-water-bottle-mascot-character-icon-illustration-drink-isolated-vector-flat-cartoon-st_752483-46.jpg" }, "9a418b21-52f9-45c9-b135-d63973e33f82": { "_id": "9a418b21-52f9-45c9-b135-d63973e33f82", "_x": 19.765625, "_y": 137.421875, "_width": 136, "_height": 90, "_type": "image", "_src": "https://img.b2bpic.net/premium-photo/shoe-white-background-cartoon-illustration_1120554-832.jpg" }, "73730581-4f60-4d18-8ca6-301876ac5421": { "_id": "73730581-4f60-4d18-8ca6-301876ac5421", "_x": 50.5, "_y": 103.2109375, "_width": 50, "_height": 30, "_type": "text", "_style": {"background": "#dedede"}, "_text": "<span>28</span><span>&nbsp;</span><span>€</span>" }, "a9574237-93e0-42e2-ac06-ca5b2921a7f6": { "_id": "a9574237-93e0-42e2-ac06-ca5b2921a7f6", "_x": 196.265625, "_y": 165.921875, "_width": 50, "_height": 30, "_type": "text", "_style": {"background": "#dedede"}, "_text": "<span>2</span><span>0</span><span> </span><span>€</span>" }, "eb875a06-5c79-40f4-b19b-07c6d1850393": { "_id": "eb875a06-5c79-40f4-b19b-07c6d1850393", "_x": 324.265625, "_y": 87.921875, "_width": 50, "_height": 30, "_type": "text", "_style": {"background": "#dedede"}, "_text": "<span>1&nbsp;</span><span>€</span>" }, "369f068a-296f-4459-9953-cc97c3d917ec": { "_id": "369f068a-296f-4459-9953-cc97c3d917ec", "_x": 437.265625, "_y": 148.921875, "_width": 50, "_height": 30, "_type": "text", "_style": {"background": "#dedede"}, "_text": "<span>45&nbsp;</span><span>€</span>" }, "7362814f-37e9-4027-bb19-1f524ff7e54b": { "_id": "7362814f-37e9-4027-bb19-1f524ff7e54b", "_x": 540.265625, "_y": 72.921875, "_width": 50, "_height": 30, "_type": "text", "_style": {"background": "#dedede"}, "_text": "<span>18&nbsp;</span><span>€</span>" } } }`'},
-                { "role": "system", "content": 'Tu respuesta debe ser únicamente el JSON del ejercicio, no es necesario que incluyas el prompt, ni saludos no "```json".'},
-                { "role": "user", "content": 'Genera un ejercicio para practicar las restas' },
-                { "role": "assistant", "content": '{"_id": "template-1","_type": "blank","_height": 200,"_title": "Rodea las restas resueltas de forma <b>incorrecta</b>","_elements": {"basic_operation_v-1": {"_id": "basic_operation_v-1","_x": 50,"_y": 60,"_width": 70,"_height": 115,"_type": "basic_operation_v","_operator": "-","_operands": ["538","416"],"_result": "122"},"basic_operation_v-2": {"_id": "basic_operation_v-2","_x": 160,"_y": 60,"_width": 70,"_height": 115,"_type": "basic_operation_v","_operator": "-","_operands": ["684","360"],"_result": "324"},"basic_operation_v-3": {"_id": "basic_operation_v-3","_x": 270,"_y": 60,"_width": 70,"_height": 115,"_type": "basic_operation_v","_operator": "-","_operands": ["967","436"],"_result": "430"},"basic_operation_v-4": {"_id": "basic_operation_v-4","_x": 480,"_y": 60,"_width": 70,"_height": 115,"_type": "basic_operation_v","_operator": "-","_operands": ["827","412"],"_result": "315"},"01e61671-8f7c-4ea8-bfd6-535a9d22cc82": {"_id": "01e61671-8f7c-4ea8-bfd6-535a9d22cc82","_x": 380,"_y": 60,"_width": 70,"_height": 115,"_type": "basic_operation_v","_operator": "-","_operands": ["805","503"],"_result": "208"}}}' },
-                { "role": "user", "content": prompt },
+                { "role": "system", "content": "Genera un ejercicio en texto plano basado en la siguiente descripción: " + prompt },
+                { "role": "system", "content": "El ejercicio se ilustrará más adelante, por lo si alguna parte del ejercicio requiere una imagen o SVG, añade una marca, ejm: `[insertar un SVG de un cuadrado rojo junto a una caja para responder]`que indique que se debe incluir dicho recurso y qué relación tiene con el texto." },
+                { "role": "system", "content": "Inicialmente la sección tenía estos valores: " + JSON.stringify(currentSection) },
+                ...textHistory.map(({ prompt, response }) => [{ "role": "user", "content": prompt }, { "role": "system", "content": response }]).flat(),
             ],
         });
-        return response;
+
+        const exerciseText = textResponse.choices[0].message.content;
+        console.log("[STEP 1]: Successfully created exercise:", exerciseText);
+
+        // Second call to convert the exercise to JSON format
+        const jsonResponse = await openai.chat.completions.create({
+            model: "gpt-4o-mini",
+            messages: [
+                { "role": "system", "content": "El estado inicial de la sección es: " + JSON.stringify(currentSection) },
+                ...history.map(({ prompt, response }) => [{ "role": "user", "content": prompt }, { "role": "system", "content": response }]).flat(),
+                { "role": "system", "content": 'Convierte el siguiente ejercicio en texto plano al formato JSON requerido: ' + exerciseText },
+                { "role": "system", "content": "El format JSON consiste en un objeto con las propiedades `height`, `title` y `elements`." },
+                { "role": "system", "content": "Por ejemplo: {\"height\": 300, \"title\": \"Ejercicio de prueba\", \"elements\": {}}" },
+                { "role": "system", "content": "El objeto elements debe contener los elementos del ejercicio, cada uno con un id único y sus propiedades." },
+                { "role": "system", "content": "Los elementos también pueden deben tener las propiedades `x`, `y`, `width`, `height` que definen su posición y tamaño." },
+                { "role": "system", "content": "También deberán tener la propiedad `viewBox` que deberá ajustarse al tamaño del contenido." },
+                { "role": "system", "content": "Por ejemplo: {\"e1\": { id: \"e1\", \"type\": \"free_form_svg\", \"x\": 10, \"y\": 20, \"width\": 100, \"height\": 50, \"content\": \"<g>...</g>\" }} , \"viewBox\": \"0 0 40 60\"}" },
+                { "role": "system", "content": "El campo `type` de los elementos siempre será `free_form_svg`" },
+                { "role": "system", "content": "Dentro de content puedes incluir contenido SVG. No es necesario que incluyas ningún título en `content` del ejercicio, ya que el título se incluirá en la propiedad `title` del objeto JSON." },
+                { "role": "system", "content": "Utiliza el contenido del elemento anterior para generar todo tipo de contenido: texto, cajas, flechas, formas, etc." },
+                { "role": "system", "content": "Puedes incluir tantos elementos como desees, cada uno con un id único" },
+                { "role": "system", "content": "Si quieres añadir texto, puedes hacerlo con el siguiente formato: {\"id\": \"e1\", \"type\": \"free_form_svg\", \"content\": \"<text x=\\\"10\\\" y=\\\"20\\\">Hola mundo</text>\"}" },
+                { "role": "system", "content": "Si quieres añadir una caja, puedes hacerlo con el siguiente formato: {\"id\": \"e1\", \"type\": \"free_form_svg\", \"content\": \"<rect x=\\\"10\\\" y=\\\"20\\\" width=\\\"100\\\" height=\\\"50\\\" fill=\\\"red\\\" />\"}" },
+                { "role": "system", "content": "Y así sucesivamente con cualquier tipo de contenido SVG, también puedes añadir estilos para que el ejercicio sea más bonito" },
+                { "role": "system", "content": "Recuerda que el contenido debe ser un objeto JSON válido. " },
+                { "role": "system", "content": "Procura que los elementos estén bien distribuidos, tengan un tamaño adecuado, esten centrados en el espacio y estén alineados entre sí" },
+                { "role": "system", "content": "El ancho disponible es de 640px. Deja 50px libres arriba para evitar que el contenido se solape con el título." },
+                { "role": "system", "content": 'Tu respuesta debe ser únicamente el JSON del ejercicio, no es necesario que incluyas el prompt, ni saludos ni "```json".' }
+            ],
+        });
+
+        const exerciseJson = jsonResponse
+        console.log("[STEP 2]: Successfully created exercise:", exerciseJson);
+
+        return {exerciseJson, exerciseText};
     } catch (error) {
-        console.error("Error asking AI:", error);
+        console.error("Error creating exercise:", error);
         throw error;
     }
 }

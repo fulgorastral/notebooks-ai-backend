@@ -7,9 +7,12 @@ router.get("/", async (req, res) => {
     res.json({test: "Hello from the AI router!"})
 })
 
-router.get("/section", async (req, res) => {
-    const prompt = req.query.p
-    const aiRes = await askAI(prompt)
+router.post("/section", async (req, res) => {
+    const prompt = req.body.q
+    const history = req.body.history
+    const textHistory = req.body.textHistory
+    const currentSection = req.body.currentSection
+    const aiRes = await askAI(prompt, history, textHistory, currentSection)
     res.json(aiRes)
 })
 
