@@ -32,7 +32,12 @@ router.get("/", async (req, res) => {
     // Get from Freepik
     let normFreepik = []
     try{
-        const responseFreepik = await queryFreepikAPI({ term: query })
+        const searchParams = {} 
+        if (query) searchParams.term = query
+        if (req.query.style) searchParams["filters[vector][style]"] = req.query.style
+        if (req.query.color) searchParams["filters[color]"] = req.query.color
+        
+        const responseFreepik = await queryFreepikAPI(searchParams)
         if (responseFreepik.status === 400) {
             res.status(400).json({ error: responseFreepik.error })
             return
