@@ -6,6 +6,7 @@
 		"openai": "^4.77.0",
 		"unsplash-js": "^7.0.19"
 	},
+	"type": "module",
 	"scripts": {
 		"build": "echo 'No build step'",
 		"dev": "nodemon index.mjs",

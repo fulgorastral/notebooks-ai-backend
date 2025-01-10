@@ -1,4 +1,5 @@
 import OpenAI from "openai"
+import templates from "./templates.mjs";
 
 const openai = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY,
@@ -25,33 +26,36 @@ export async function askAI(prompt, history, textHistory, currentSection) {
         console.log("[STEP 1]: Successfully created exercise:", exerciseText);
 
         // Second call to convert the exercise to JSON format
+        const messages = [
+            { "role": "system", "content": "El estado inicial de la sección es: " + JSON.stringify(currentSection) },
+            ...history.map(({ prompt, response }) => [{ "role": "user", "content": prompt }, { "role": "system", "content": response }]).flat(),
+            { "role": "system", "content": 'Convierte el siguiente ejercicio en texto plano al formato JSON requerido: ' + exerciseText },
+            { "role": "system", "content": `Convierte el ejercicio en texto plano al formato JSON requerido. Lo que se pide es: ${prompt}` },
+            { "role": "system", "content": "El format JSON consiste en un objeto con las propiedades `height`, `title` y `elements`." },
+            { "role": "system", "content": "Por ejemplo: {\"height\": 300, \"title\": \"Ejercicio de prueba\", \"elements\": {}}" },
+            { "role": "system", "content": "El objeto elements debe contener los elementos del ejercicio, cada uno con un id único y sus propiedades." },
+            { "role": "system", "content": "Los elementos también pueden deben tener las propiedades `x`, `y`, `width`, `height` que definen su posición y tamaño." },
+            { "role": "system", "content": "También deberán tener la propiedad `viewBox` que deberá ajustarse al tamaño del contenido." },
+            { "role": "system", "content": "Por ejemplo: {\"e1\": { id: \"e1\", \"type\": \"free_form_svg\", \"x\": 10, \"y\": 20, \"width\": 100, \"height\": 50, \"content\": \"<g>...</g>\" }} , \"viewBox\": \"0 0 40 60\"}" },
+            { "role": "system", "content": "El campo `type` de los elementos siempre será `free_form_svg`" },
+            { "role": "system", "content": "Dentro de content puedes incluir contenido SVG. No es necesario que incluyas ningún título en `content` del ejercicio, ya que el título se incluirá en la propiedad `title` del objeto JSON." },
+            { "role": "system", "content": "Utiliza el contenido del elemento anterior para generar todo tipo de contenido: texto, cajas, flechas, formas, etc." },
+            { "role": "system", "content": "Puedes incluir tantos elementos como desees, cada uno con un id único" },
+            { "role": "system", "content": "Si quieres añadir una caja, puedes hacerlo con el siguiente formato: {\"id\": \"e1\", \"type\": \"free_form_svg\", \"content\": \"<rect x=\\\"10\\\" y=\\\"20\\\" width=\\\"100\\\" height=\\\"50\\\" fill=\\\"red\\\" />\"}" },
+            { "role": "system", "content": "Si quieres añadir texto, puedes hacerlo con el siguiente formato: {\"id\": \"e1\", \"type\": \"text\", \"x\": 10, \"y\": 20, \"width\": 100, \"height\": 50, \"text\": \"Texto de ejemplo\"}" },
+            { "role": "system", "content": "Si quieres añadir una imagen, puedes hacerlo con el siguiente formato: {\"id\": \"e1\", \"type\": \"image\", \"x\": 10, \"y\": 20, \"width\": 100, \"height\": 50, \"src\": \"https://example.com/image.jpg\"}" },
+            { "role": "system", "content": "Y así sucesivamente con cualquier tipo de contenido SVG, también puedes añadir estilos para que el ejercicio sea más bonito" },
+            { "role": "system", "content": "Si necesitas hacer representar operaciones matemáticas, puedes hacerlo usando el elemento de tipo `basic_operation_v` con el siguiente formato: {\"id\": \"e1\", \"type\": \"basic_operation_v\", \"operator\": \"+\", \"operands\": [\"2\", \"3\"], \"result\": \"5\"}, donde `operator` es el operador, `operands` son los operandos y `result` es el resultado. Si dejas alguno de estos valores en blanco (\"\"), se mostrará una caja para responder. Dimensiones: Cada fila ocupa 40px, ajusta el tamaño a lo alto (50px por fila: operandos y resultado) y ancho (ajusta al tamaño dependiendo del número de dígitos más espacio para el operador y un gap entre ellos) si hay 2 operandos y un resultado, el alto será de 150px." },
+            { "role": "system", "content": "Recuerda que el contenido debe ser un objeto JSON válido. " },
+            { "role": "system", "content": "Aquí te dejo unos ejemplos de ejercicios" },
+            ...templates.map(sData => ({ "role": "system", "content": JSON.stringify(sData) })),
+            { "role": "system", "content": "Procura que los elementos estén bien distribuidos, tengan un tamaño adecuado, esten centrados en el espacio y estén alineados entre sí. Ten en cuenta que para que no se solapen los elementos, hay que tener en cuenta la posición y tamaño de cada uno para evitar poner uno encima de otro." },
+            { "role": "system", "content": "El ancho disponible es de 640px. Deja 50px libres arriba para evitar que el contenido se solape con el título." },
+            { "role": "system", "content": 'Tu respuesta debe ser únicamente el JSON del ejercicio, no es necesario que incluyas el prompt, ni saludos ni "```json".' }
+        ]
         const jsonResponse = await openai.chat.completions.create({
             model: "gpt-4o-mini",
-            messages: [
-                { "role": "system", "content": "El estado inicial de la sección es: " + JSON.stringify(currentSection) },
-                ...history.map(({ prompt, response }) => [{ "role": "user", "content": prompt }, { "role": "system", "content": response }]).flat(),
-                { "role": "system", "content": 'Convierte el siguiente ejercicio en texto plano al formato JSON requerido: ' + exerciseText },
-                { "role": "system", "content": `Convierte el ejercicio en texto plano al formato JSON requerido. Lo que se pide es: ${prompt}` },
-                { "role": "system", "content": "El format JSON consiste en un objeto con las propiedades `height`, `title` y `elements`." },
-                { "role": "system", "content": "Por ejemplo: {\"height\": 300, \"title\": \"Ejercicio de prueba\", \"elements\": {}}" },
-                { "role": "system", "content": "El objeto elements debe contener los elementos del ejercicio, cada uno con un id único y sus propiedades." },
-                { "role": "system", "content": "Los elementos también pueden deben tener las propiedades `x`, `y`, `width`, `height` que definen su posición y tamaño." },
-                { "role": "system", "content": "También deberán tener la propiedad `viewBox` que deberá ajustarse al tamaño del contenido." },
-                { "role": "system", "content": "Por ejemplo: {\"e1\": { id: \"e1\", \"type\": \"free_form_svg\", \"x\": 10, \"y\": 20, \"width\": 100, \"height\": 50, \"content\": \"<g>...</g>\" }} , \"viewBox\": \"0 0 40 60\"}" },
-                { "role": "system", "content": "El campo `type` de los elementos siempre será `free_form_svg`" },
-                { "role": "system", "content": "Dentro de content puedes incluir contenido SVG. No es necesario que incluyas ningún título en `content` del ejercicio, ya que el título se incluirá en la propiedad `title` del objeto JSON." },
-                { "role": "system", "content": "Utiliza el contenido del elemento anterior para generar todo tipo de contenido: texto, cajas, flechas, formas, etc." },
-                { "role": "system", "content": "Puedes incluir tantos elementos como desees, cada uno con un id único" },
-                { "role": "system", "content": "Si quieres añadir una caja, puedes hacerlo con el siguiente formato: {\"id\": \"e1\", \"type\": \"free_form_svg\", \"content\": \"<rect x=\\\"10\\\" y=\\\"20\\\" width=\\\"100\\\" height=\\\"50\\\" fill=\\\"red\\\" />\"}" },
-                { "role": "system", "content": "Si quieres añadir texto, puedes hacerlo con el siguiente formato: {\"id\": \"e1\", \"type\": \"text\", \"x\": 10, \"y\": 20, \"width\": 100, \"height\": 50, \"text\": \"Texto de ejemplo\"}" },
-                { "role": "system", "content": "Si quieres añadir una imagen, puedes hacerlo con el siguiente formato: {\"id\": \"e1\", \"type\": \"image\", \"x\": 10, \"y\": 20, \"width\": 100, \"height\": 50, \"src\": \"https://example.com/image.jpg\"}" },
-                { "role": "system", "content": "Y así sucesivamente con cualquier tipo de contenido SVG, también puedes añadir estilos para que el ejercicio sea más bonito" },
-                { "role": "system", "content": "Si necesitas hacer representar operaciones matemáticas, puedes hacerlo usando el elemento de tipo `basic_operation_v` con el siguiente formato: {\"id\": \"e1\", \"type\": \"basic_operation_v\", \"operator\": \"+\", \"operands\": [\"2\", \"3\"], \"result\": \"5\"}, donde `operator` es el operador, `operands` son los operandos y `result` es el resultado. Si dejas alguno de estos valores en blanco (\"\"), se mostrará una caja para responder. Dimensiones: Cada fila ocupa 40px, ajusta el tamaño a lo alto (50px por fila: operandos y resultado) y ancho (ajusta al tamaño dependiendo del número de dígitos más espacio para el operador y un gap entre ellos) si hay 2 operandos y un resultado, el alto será de 150px." },
-                { "role": "system", "content": "Recuerda que el contenido debe ser un objeto JSON válido. " },
-                { "role": "system", "content": "Procura que los elementos estén bien distribuidos, tengan un tamaño adecuado, esten centrados en el espacio y estén alineados entre sí. Ten en cuenta que para que no se solapen los elementos, hay que tener en cuenta la posición y tamaño de cada uno para evitar poner uno encima de otro." },
-                { "role": "system", "content": "El ancho disponible es de 640px. Deja 50px libres arriba para evitar que el contenido se solape con el título." },
-                { "role": "system", "content": 'Tu respuesta debe ser únicamente el JSON del ejercicio, no es necesario que incluyas el prompt, ni saludos ni "```json".' }
-            ],
+            messages,
         });
 
         const exerciseJson = jsonResponse.choices[0].message.content;
