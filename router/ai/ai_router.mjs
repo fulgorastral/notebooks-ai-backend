@@ -1,5 +1,6 @@
 import express from "express"
-import { askAI } from "./openai_api.mjs"
+import { askAI as askOpenAI } from "./openai_api.mjs"
+import { askGeminiAI } from "./gemini_api.mjs"
 const router = express.Router()
 
 // GET /api/ai
@@ -12,8 +13,11 @@ router.post("/section", async (req, res) => {
     const history = req.body.history
     const textHistory = req.body.textHistory
     const currentSection = req.body.currentSection
-    const aiRes = await askAI(prompt, history, textHistory, currentSection)
+    // const aiRes = await askOpenAI(prompt, history, textHistory, currentSection)
+    const aiRes = await askGeminiAI(prompt, history, textHistory, currentSection)
+
     res.json(aiRes)
 })
+
 
 export default router
