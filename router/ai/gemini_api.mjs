@@ -5,7 +5,8 @@ import templates from './templates.mjs'
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY)
 const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash-exp' })
 
-export async function askGeminiAI(prompt, history, textHistory, currentSection) {
+export async function askGeminiAI(body) {
+    const { prompt, history, textHistory, currentSection, neae, neaeDetails, subject } = body
 
     const messages_app_context = [
         'Eres una IA que parte de una app de construcción de ejercicios. Los usuarios son profesores de infantil y primaria de cualquier materia. Tu objetivo es ayudar a los profesores a crear ejercicios o modificar los ejercicios que te pasen',
@@ -23,6 +24,14 @@ export async function askGeminiAI(prompt, history, textHistory, currentSection) 
         'La propiedad `title` define el título del ejercicio. Aquí podrás incluir el enunciado del ejercicio, instrucciones o cualquier otro texto que quieras mostrar en la parte superior del ejercicio.',
         'La propiedad `elements` es un objeto que contiene los elementos del ejercicio. Cada elemento debe tener un id único y sus propiedades.',
     ]
+
+    const messages_options = [
+        'El profesor ha seleccionado las siguientes opciones para el ejercicio:',
+        neae && `NEAE: ${neae}`,
+        neaeDetails && `Detalles NEAE: ${neaeDetails}`,
+        subject && `Asignatura: ${subject}`,
+        'Utiliza estas opciones para adaptar el ejercicio a las necesidades del alumno.',
+    ].filter(Boolean)
 
     const messages_elements = [
         'El objeto `elements` debe contener los elementos (componenentes, widgets, etc) del ejercicio, cada uno con un id único y sus propiedades.',
@@ -65,29 +74,32 @@ export async function askGeminiAI(prompt, history, textHistory, currentSection) 
     ]
 
     const messages = [
-        ...messages_app_context,
-        ...messages_exercise_structure,
-        ...messages_elements,
-        ...messages_exercise_context_initial,
-        ...messages_exercise_context_history,
-        ...messages_templates,
-        ...messages_response_criteria,
-    ]
+        messages_app_context,
+        messages_options.length > 2 && messages_options,  // Only show options if there are more than 2 lines (the first and last lines are meant to introduce and close the options but they are not options themselves)
+        messages_exercise_structure,
+        messages_elements,
+        messages_exercise_context_initial,
+        messages_exercise_context_history,
+        messages_templates,
+        `El prompt del profesor es: ${prompt}`,
+        messages_response_criteria,
+    ].flat().filter(Boolean)
 
     console.log(` ------------------------- [QUERY] -------------------------`)
     console.log(`[INFO] Request to Gemini AI:`)
     console.log(` - Prompt: ${prompt}`)
-    console.log(` - History: ${history}`)
-    console.log(` - Current Section: ${JSON.stringify(currentSection)}`)
-    console.log(` - Messages: ${messages}`)
+    console.log(` - History count: ${history.length}`)
+    console.log(` - Options:`)
+    console.log(`   - NEAE: ${neae}`)
+    console.log(`   - NEAE Details: ${neaeDetails}`)
+    console.log(`   - Subject: ${subject}`)
     console.log(`[INFO] Asking Gemini AI...`)
 
     const result = await model.generateContent(messages)
     // Parse the response to extract the JSON result
     const jsonResult = result.response.text().replace(/```json([\s\S]*?)```/g, '$1')
 
-    console.log(`[RESULT] Gemini AI response:`)
-    console.log(jsonResult)
+    console.log(`[RESULT] Response sent to the client...`)
     
     return { exerciseJson: jsonResult }
 }

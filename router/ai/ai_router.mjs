@@ -9,12 +9,8 @@ router.get("/", async (req, res) => {
 })
 
 router.post("/section", async (req, res) => {
-    const prompt = req.body.q
-    const history = req.body.history
-    const textHistory = req.body.textHistory
-    const currentSection = req.body.currentSection
     // const aiRes = await askOpenAI(prompt, history, textHistory, currentSection)
-    const aiRes = await askGeminiAI(prompt, history, textHistory, currentSection)
+    const aiRes = await askGeminiAI(req.body)
 
     res.json(aiRes)
 })
