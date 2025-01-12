@@ -97,11 +97,17 @@ export async function askGeminiAI(body) {
     console.log(`   - Subject: ${subject}`)
     console.log(`[INFO] Asking Gemini AI...`)
 
-    const result = await model.generateContent(messages)
-    // Parse the response to extract the JSON result
-    const jsonResult = result.response.text().replace(/```json([\s\S]*?)```/g, '$1')
+    try {
+        const result = await model.generateContent(messages)
+        // Parse the response to extract the JSON result
+        const jsonResult = result.response.text().replace(/```json([\s\S]*?)```/g, '$1')
 
-    console.log(`[RESULT] Response sent to the client...`)
+        console.log(`[RESULT] Response sent to the client...`)
+        return { exerciseJson: jsonResult }
+    } catch (error) {
+        console.error(`[ERROR] Error asking Gemini AI:`, error)
+        return { error: error.message }
+    }
+
     
-    return { exerciseJson: jsonResult }
 }
