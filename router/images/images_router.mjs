@@ -8,6 +8,9 @@ import queryFreepikAPI from "./freepik_api.mjs"
 router.get("/", async (req, res) => {
     const query = req.query.q
 
+    console.log(`[INFO] Request to images API:`)
+    console.log(` - Query: ${query}`)
+
     // Get from Unsplash
     let normUnsplash = []
     try{

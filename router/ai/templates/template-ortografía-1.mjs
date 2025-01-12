@@ -2,7 +2,7 @@ export default {
     "_id": "template-6",
     "_type": "blank",
     "_height": 224.875,
-    "_title": "<span>L</span><span>a</span><span>s</span><span> </span><span>s</span><span>i</span><span>g</span><span>u</span><span>i</span><span>e</span><span>n</span><span>t</span><span>e</span><span>s</span><span> </span><span>p</span><span>a</span><span>l</span><span>a</span><span>b</span><span>r</span><span>a</span><span>s</span><span> </span><span>c</span><span>o</span><span>n</span><span>t</span><span>i</span><span>e</span><span>n</span><span>e</span><span>n</span><span> </span><span>e</span><span>r</span><span>r</span><span>o</span><span>r</span><span>e</span><span>s</span><span> </span><span>o</span><span>r</span><span>t</span><span>o</span><span>g</span><span>r</span><span>á</span><span>f</span><span>i</span><span>c</span><span>o</span><span>s</span><span>.</span><span> </span><span>E</span><span>s</span><span>c</span><span>r</span><span>i</span><span>b</span><span>e</span><span> </span><span>l</span><span>a</span><span>s</span><span> </span><span>p</span><span>a</span><span>l</span><span>a</span><span>b</span><span>r</span><span>a</span><span>s</span><span> </span><span>c</span><span>o</span><span>r</span><span>r</span><span>e</span><span>c</span><span>t</span><span>a</span><span>m</span><span>e</span><span>n</span><span>t</span><span>e</span>",
+    "_title": "Las siguientes palabras contienen errores ortográficos. Escribe las palabras correctamente",
     "_elements": {
         "897dfeab-ee77-4131-a913-5c972fd680fc": {
             "_id": "897dfeab-ee77-4131-a913-5c972fd680fc",

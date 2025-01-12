@@ -2,7 +2,7 @@ export default {
     "_id": "template-2",
     "_type": "blank",
     "_height": 244.421875,
-    "_title": "<span>R</span><span>o</span><span>d</span><span>e</span><span>a</span><span> </span><span>l</span><span>o</span><span>s</span><span> </span><span>o</span><span>b</span><span>j</span><span>e</span><span>t</span><span>o</span><span>s</span><span> </span><span>q</span><span>u</span><span>e</span><span> </span><span>p</span><span>o</span><span>d</span><span>r</span><span>í</span><span>a</span><span>s</span><span> </span><span>c</span><span>o</span><span>m</span><span>p</span><span>r</span><span>a</span><span>r</span><span> </span><span>c</span><span>o</span><span>n</span><span> </span><span style=\"font-weight: bold;\">2</span><span style=\"font-weight: bold;\">3</span><span style=\"font-weight: bold;\">€</span>",
+    "_title": "Rodea los objetos que podrías comprar con <span style=\"font-weight: bold;\">2</span><span style=\"font-weight: bold;\">3</span><span style=\"font-weight: bold;\">€</span>",
     "_elements": {
         "2078a78f-0602-4fd0-90c6-014584672f26": {
             "_id": "2078a78f-0602-4fd0-90c6-014584672f26",
@@ -66,7 +66,7 @@ export default {
                 "textAlign": "center",
                 "justifyContent": "center"
             },
-            "_text": "<span>28</span><span> </span><span>€</span>"
+            "_text": "<span>28</span> €"
         },
         "a9574237-93e0-42e2-ac06-ca5b2921a7f6": {
             "_id": "a9574237-93e0-42e2-ac06-ca5b2921a7f6",
@@ -80,7 +80,7 @@ export default {
                 "textAlign": "center",
                 "justifyContent": "center"
             },
-            "_text": "<span>2</span><span>0</span><span> </span><span>€</span>"
+            "_text": "20 €"
         },
         "eb875a06-5c79-40f4-b19b-07c6d1850393": {
             "_id": "eb875a06-5c79-40f4-b19b-07c6d1850393",
@@ -94,7 +94,7 @@ export default {
                 "textAlign": "center",
                 "justifyContent": "center"
             },
-            "_text": "<span>1 </span><span>€</span>"
+            "_text": "<span>1 </span>€"
         },
         "369f068a-296f-4459-9953-cc97c3d917ec": {
             "_id": "369f068a-296f-4459-9953-cc97c3d917ec",
@@ -108,7 +108,7 @@ export default {
                 "textAlign": "center",
                 "justifyContent": "center"
             },
-            "_text": "<span>45 </span><span>€</span>"
+            "_text": "<span>45 </span>€"
         },
         "7362814f-37e9-4027-bb19-1f524ff7e54b": {
             "_id": "7362814f-37e9-4027-bb19-1f524ff7e54b",
@@ -122,7 +122,7 @@ export default {
                 "textAlign": "center",
                 "justifyContent": "center"
             },
-            "_text": "<span>18 </span><span>€</span>"
+            "_text": "<span>18 </span>€"
         }
     }
 }
