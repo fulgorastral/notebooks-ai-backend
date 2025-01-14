@@ -16,7 +16,7 @@ router.get("/", async (req, res) => {
     try{
         const responseUnsplash = await unsplash.search.getPhotos({
             query,
-            perPage: 20,
+            perPage: 30,
         })
         if (responseUnsplash.type === "error") {
             if (responseUnsplash.status === 400) {
