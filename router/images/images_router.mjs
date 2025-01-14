@@ -72,8 +72,15 @@ router.get("/generate", async (req, res) => {
         const data = response.data.map(({ url }) => url)
         res.json(data)
     } catch (error) {
-        console.error(`Error generating image: ${error}`)
-        res.status(500).json({ error: "Internal server error" })
+
+        try{
+            const response = await generateOpenAIImage({ prompt: `Cartoon ${prompt}` })
+            const data = response.data.map(({ url }) => url)
+            res.json(data)
+        } catch (error) {
+            console.error(`Error generating image: ${error}`)
+            res.status(500).json({ error: "Internal server error" })
+        }
     }
 })
 
