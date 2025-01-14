@@ -108,6 +108,4 @@ export async function askGeminiAI(body) {
         console.error(`[ERROR] Error asking Gemini AI:`, error)
         return { error: error.message }
     }
-
-    
 }

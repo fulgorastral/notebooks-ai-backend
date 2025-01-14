@@ -67,3 +67,20 @@ export async function askAI(prompt, history, textHistory, currentSection) {
         throw error;
     }
 }
+
+
+
+export async function generateOpenAIImage({prompt}) {
+    try {
+        const response = await openai.images.generate({
+            model: "dall-e-3",
+            prompt: prompt,
+            n: 1,
+            size: "1024x1024",
+        });
+        return response;
+    } catch (error) {
+        console.error("Error generating image:", error);
+        return        
+    }
+}
