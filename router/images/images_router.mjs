@@ -16,7 +16,7 @@ router.get("/", async (req, res) => {
     try{
         const responseUnsplash = await unsplash.search.getPhotos({
             query,
-            perPage: 9,
+            perPage: 20,
         })
         if (responseUnsplash.type === "error") {
             if (responseUnsplash.status === 400) {
@@ -57,7 +57,7 @@ router.get("/", async (req, res) => {
         console.error(`Error getting images from Freepik: ${error}`)
     }
 
-    res.json([...normUnsplash, ...normFreepik])
+    res.json([...normFreepik, ...normUnsplash])
 })
 
 export default router
