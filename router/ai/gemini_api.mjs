@@ -6,7 +6,7 @@ const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY)
 const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash-exp' })
 
 export async function askGeminiAI(body) {
-    const { q: query, history, textHistory, currentSection, neae, neaeDetails, subject, attempt } = body
+    const { q: query, history, textHistory, currentSection, neae, neaeDetails, subject, attempt, curso } = body
 
     const messages_app_context = [
         'Eres una IA que parte de una app de construcción de ejercicios. Los usuarios son profesores de infantil y primaria de cualquier materia. Tu objetivo es ayudar a los profesores a crear ejercicios o modificar los ejercicios que te pasen',
@@ -30,6 +30,7 @@ export async function askGeminiAI(body) {
         neae && `NEAE: ${neae}`,
         neaeDetails && `Detalles NEAE: ${neaeDetails}`,
         subject && `Asignatura: ${subject}`,
+        curso && `Curso: ${curso}`,
         'Utiliza estas opciones para adaptar el ejercicio a las necesidades del alumno.',
     ].filter(Boolean)
 
@@ -95,6 +96,7 @@ export async function askGeminiAI(body) {
     console.log(`   - NEAE: ${neae}`)
     console.log(`   - NEAE Details: ${neaeDetails}`)
     console.log(`   - Subject: ${subject}`)
+    console.log(`   - Curso: ${curso}`)
     console.log(`[INFO] Asking Gemini AI...`)
 
     try {
