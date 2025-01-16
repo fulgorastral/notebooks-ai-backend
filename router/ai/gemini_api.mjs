@@ -5,7 +5,7 @@ import templates from './templates.mjs'
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY)
 const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash-exp' })
 
-export async function askGeminiAI(body) {
+export async function editSectionWithGeminiAI(body) {
     const { q: query, history, textHistory, currentSection, neae, neaeDetails, subject, attempt, curso } = body
 
     const messages_app_context = [
@@ -106,6 +106,61 @@ export async function askGeminiAI(body) {
 
         console.log(`[RESULT] Response sent to the client...`)
         return { exerciseJson: jsonResult }
+    } catch (error) {
+        console.error(`[ERROR] Error asking Gemini AI:`, error)
+        return { error: error.message }
+    }
+}
+
+
+export async function editElementWithGeminiAI(body) {
+    const { q: query, element } = body
+
+    const messages_app_context = [
+        'Eres una IA que parte de una app de construcción de ejercicios. Los usuarios son profesores de infantil y primaria de cualquier materia. Tu objetivo es ayudar a los profesores a crear ejercicios o modificar los ejercicios que te pasen',
+        'La app tomará los datos actuales de un ejercicio y te los pasará para que puedas generar un nuevo ejercicio o modificar el actual según las indicaciones del profesor', 
+        'La app también está orientada a adaptar los ejercicios a las necesidades de los alumnos, por lo que el profesor podrá pedirte que modifiques el ejercicio actual para adaptarlo a las necesidades de un alumno concreto.',
+        'Los ejercicios estan pensados para ser impresos en papel, por lo que no es necesario que sean interactivos, pero si que sean visuales y atractivos para los alumnos.',
+    ]
+
+    const messages_element_context = [
+        'El profesor te ha pasado un elemento del ejercicio para que lo modifiques según sus indicaciones.',
+        'Los elementos del ejercicio son los componentes visuales que se muestran en el ejercicio, como imágenes, textos, operaciones matemáticas, etc.',
+        'Cada elemento tiene un id único y sus propiedades, como la posición, tamaño y contenido.',
+        'Esta es la estructura de cada elemento disponible en la app, utiliza esta información para modificar el elemento actual según las posibilidades que te ofrece la app.',
+        'Elemento de Texto: {"id": "e1", "type": "text", "x": 10, "y": 20, "width": 100, "height": 50, "text": "Texto de ejemplo"}',
+        'Elemento de Imagen: {"id": "e1", "type": "image", "x": 10, "y": 20, "width": 100, "height": 50, "src": "https://example.com/image.jpg"}',
+        'Elemento de Operación Matemática Vertical: {"id": "e1", "type": "basic_operation_v", "operator": "+", "operands": ["2", "3"], "result": "5"}',
+        'Elemento de SVG: {"id": "e1", "type": "free_form_svg", "x": 10, "y": 20, "width": 100, "height": 50, "content": "<g>...</g>", "viewBox": "0 0 40 60"}',
+    ]
+
+    const messages_current_element = [
+        'El elemento actual es: ' + JSON.stringify(element),
+    ]
+
+    const messages_response_criteria = [
+        'Recuerda que el contenido debe ser un objeto JSON válido.', 
+        'No inyectes código HTML o JavaScript en el contenido ningún elemento, solo contenido SVG en el elemento `free_form_svg`.',
+        'Aunque la pregunta del profesor sea ambigua, intenta siempre generar un elemento que tenga sentido y sea visualmente atractivo para los alumnos.',
+        'Tu respuesta debe ser únicamente el JSON del elemento, no es debes incluir ningún tipo de saludo, ni de sintaxis markdown como "```json"',
+    ]
+
+    const messages = [
+        messages_app_context,
+        messages_element_context,
+        messages_current_element,
+        `El prompt del profesor es: ${query}`,
+        messages_response_criteria,
+    ].flat().filter(Boolean)
+
+
+    try {
+        const result = await model.generateContent(messages)
+        // Parse the response to extract the JSON result
+        const jsonResult = result.response.text().replace(/```json([\s\S]*?)```/g, '$1')
+
+        console.log(`[RESULT] Response sent to the client...`)
+        return { element: jsonResult }
     } catch (error) {
         console.error(`[ERROR] Error asking Gemini AI:`, error)
         return { error: error.message }

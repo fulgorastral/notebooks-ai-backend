@@ -1,6 +1,5 @@
 import express from "express"
-import { askAI as askOpenAI } from "./openai_api.mjs"
-import { askGeminiAI } from "./gemini_api.mjs"
+import { editSectionWithGeminiAI, editElementWithGeminiAI } from "./gemini_api.mjs"
 const router = express.Router()
 
 // GET /api/ai
@@ -10,7 +9,15 @@ router.get("/", async (req, res) => {
 
 router.post("/section", async (req, res) => {
     // const aiRes = await askOpenAI(prompt, history, textHistory, currentSection)
-    const aiRes = await askGeminiAI(req.body)
+    const aiRes = await editSectionWithGeminiAI(req.body)
+
+    res.json(aiRes)
+})
+
+
+router.post("/element", async (req, res) => {
+    // const aiRes = await askOpenAI(prompt, history, textHistory, currentSection)
+    const aiRes = await editElementWithGeminiAI(req.body)
 
     res.json(aiRes)
 })
