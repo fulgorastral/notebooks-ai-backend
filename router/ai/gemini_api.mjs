@@ -3,7 +3,7 @@ import templates from './templates.mjs'
 
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY)
-const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash-thinking-exp-01-21' })
+const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash-001' })
 
 export async function editSectionWithGeminiAI(body) {
     const { q: query, history, textHistory, currentSection, neae, neaeDetails, subject, attempt, curso } = body
